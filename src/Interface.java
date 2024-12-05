@@ -19,15 +19,17 @@ public class Interface extends JFrame implements ActionListener{
     private JPanel BOTTOMpanel = new JPanel();
     private JMenuBar menubar = new JMenuBar();
     
+    //private JScrollPane CONTENT_js_Pane = new JScrollPane();
+    //JScrollPane scrollPane = new JScrollPane(panel);
     private JPanel CONTENTpanel = new JPanel();
     private JLabel CONTENT_image = new JLabel();
     private Image CONTENT_save;
     private int CONTENT_X_SIZE = WIDTH/4;
     private int CONTENT_Y_SIZE = HEIGHT/4;
     private int content_x_start = WIDTH/2-CONTENT_X_SIZE/2;
-    private int content_x_end = WIDTH/2-CONTENT_X_SIZE/2+WIDTH/4;
-    private int content_y_start = (HEIGHT-(HEIGHT/8+HEIGHT/5))/2-CONTENT_Y_SIZE/2;
-    private int content_y_end = (HEIGHT-(HEIGHT/8+HEIGHT/5))/2-CONTENT_Y_SIZE/2+HEIGHT/4;
+    private int content_x_end = content_x_start+CONTENT_X_SIZE;
+    private int content_y_start = (HEIGHT-(HEIGHT/8+HEIGHT/5))/2-CONTENT_Y_SIZE/2-HEIGHT/80; //(HEIGHT/80) to fix menubar
+    private int content_y_end = content_y_start+CONTENT_Y_SIZE;
 
     public void cria_FRAME_PRINCIPAL(){
         
@@ -97,11 +99,11 @@ public class Interface extends JFrame implements ActionListener{
             while(!this.isInterrupted()){
                 location = MouseInfo.getPointerInfo().getLocation();
                 X = location.x;
-                Y = location.y-HEIGHT/5+10;
-                // System.out.println(X+" "+content_x_start+" "+content_x_end);
-                // System.out.println(Y+" "+content_y_start+" "+content_y_end);
+                Y = location.y-HEIGHT/5;
+                System.out.println(X+" "+content_x_start+" "+content_x_end);
+                System.out.println(Y+" "+content_y_start+" "+content_y_end);
                 if(X>=content_x_start && X<=content_x_end && Y>=content_y_start && Y<=content_y_end){
-                    CONTENT_save = RandomImage.paint_pixel(CONTENT_save,X-content_x_start,Y-content_y_start,TOOLS_panel.current_color.getBackground());
+                    CONTENT_save = RandomImage.paint_pixel(CONTENT_save,X-content_x_start,Y-content_y_start,TOOLS_panel.current_color.getBackground(),TOOLS_panel.pixels_Selector.getSelectedIndex(),TOOLS_panel.checkBox_circle.isSelected()?1:2,TOOLS_panel.checkBox_spray.isSelected());
                     CONTENT_image.setIcon(new ImageIcon(CONTENT_save)); 
                 }
             }
@@ -126,5 +128,48 @@ public class Interface extends JFrame implements ActionListener{
         @Override public void mouseExited(MouseEvent e) {}
 
     };
+
+    
+    TextFieldHandler th = new TextFieldHandler();
+    public class TextFieldHandler implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent event){
+            if(event.getSource()==BOTTOM_panel.width_textfield){
+                CONTENTpanel.setVisible(false);
+                CONTENTpanel.remove(CONTENT_image);
+
+                CONTENT_X_SIZE=Integer.parseInt(BOTTOM_panel.width_textfield.getText());
+                content_x_start = WIDTH/2-CONTENT_X_SIZE/2;
+                content_x_end = content_x_start+CONTENT_X_SIZE;
+                content_y_start = (HEIGHT-(HEIGHT/8+HEIGHT/5))/2-CONTENT_Y_SIZE/2;
+                content_y_end = content_y_start+CONTENT_Y_SIZE;
+
+                CONTENT_save = (RandomImage.return_blank_image(CONTENT_Y_SIZE,CONTENT_X_SIZE));
+                CONTENT_image.setIcon(new ImageIcon( CONTENT_save ));
+                CONTENT_image.addMouseListener(ml_draw);
+                Toolbox.implementa_label(CONTENT_image,"",false,WIDTH/2-CONTENT_X_SIZE/2,(HEIGHT-(HEIGHT/8+HEIGHT/5))/2-CONTENT_Y_SIZE/2,CONTENT_X_SIZE,CONTENT_Y_SIZE,CONTENTpanel);
+                Toolbox.edita_panel(CONTENTpanel,false,new Color(31,32,37)); //1,32,37
+                CONTENTpanel.setVisible(true);
+            }
+            else if(event.getSource()==BOTTOM_panel.height_textfield){
+                CONTENTpanel.setVisible(false);
+                CONTENTpanel.removeAll();
+
+                CONTENT_Y_SIZE=Integer.parseInt(BOTTOM_panel.height_textfield.getText());
+                content_x_start = WIDTH/2-CONTENT_X_SIZE/2;
+                content_x_end = content_x_start+CONTENT_X_SIZE;
+                content_y_start = (HEIGHT-(HEIGHT/8+HEIGHT/5))/2-CONTENT_Y_SIZE/2;
+                content_y_end = content_y_start+CONTENT_Y_SIZE;
+
+                CONTENT_save = (RandomImage.return_blank_image(CONTENT_Y_SIZE,CONTENT_X_SIZE));
+                CONTENT_image.setIcon(new ImageIcon( CONTENT_save ));
+                CONTENT_image.addMouseListener(ml_draw);
+                CONTENTpanel.setVisible(true);
+                Toolbox.implementa_label(CONTENT_image,"",false,WIDTH/2-CONTENT_X_SIZE/2,(HEIGHT-(HEIGHT/8+HEIGHT/5))/2-CONTENT_Y_SIZE/2,CONTENT_X_SIZE,CONTENT_Y_SIZE,CONTENTpanel);
+                Toolbox.edita_panel(CONTENTpanel,false,new Color(31,32,37)); //1,32,37
+            }
+        }
+
+    }
 
 }
