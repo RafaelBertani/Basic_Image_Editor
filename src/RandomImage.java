@@ -77,7 +77,7 @@ public class RandomImage {
                     e.printStackTrace();
                 }                
             }
-            else if(spray==false){ //square
+            else if(format==2 && spray==false){ //square
                 try {
                     for(int i=x-pixels/2;i<x+pixels/2;i++){
                         for(int j=y-pixels/2;j<y+pixels/2;j++){
@@ -109,7 +109,7 @@ public class RandomImage {
                     e.printStackTrace();
                 }                
             }
-            else if(spray==true){ //square spray
+            else if(format==2 && spray==true){ //square spray
                 try {
                     for(int i=x-pixels/2;i<x+pixels/2;i++){
                         for(int j=y-pixels/2;j<y+pixels/2;j++){
@@ -124,10 +124,66 @@ public class RandomImage {
                     e.printStackTrace();
                 }
             }
-
+            else if(format==3){ //fill
+                try {
+                    int base_color = buffered_image.getRGB(x,y);
+                    balde_r(buffered_image,x,y,base_color,pixel);
+                    balde_l(buffered_image,x-1,y,base_color,pixel);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         return (Image) buffered_image;
+    }
+
+    public static void balde_r(BufferedImage bf, int x, int y, int base_color, int desired_color){
+        
+        if(base_color==bf.getRGB(x,y)){
+            bf.setRGB(x,y,desired_color);
+            if( (x+1)<bf.getWidth() ){
+                if(bf.getRGB(x+1,y)==base_color){
+                    balde_r(bf,x+1,y,base_color,desired_color);
+                }
+            }
+            if( (y+1)<bf.getHeight() ){
+                if(bf.getRGB(x,y+1)==base_color){
+                    balde_r(bf,x,y+1,base_color,desired_color);
+                }
+            }
+            if( (y-1)>=0 ){
+                if(bf.getRGB(x,y-1)==base_color){
+                    balde_r(bf,x,y-1,base_color,desired_color);
+                }
+            }
+        }
+        
+        
+    }
+
+    public static void balde_l(BufferedImage bf, int x, int y, int base_color, int desired_color){
+        
+        if(base_color==bf.getRGB(x,y)){
+            bf.setRGB(x,y,desired_color);
+            if( (x-1)>=0 ){
+                if(bf.getRGB(x-1,y)==base_color){
+                    balde_l(bf,x-1,y,base_color,desired_color);
+                }
+            }
+            if( (y+1)<bf.getHeight() ){
+                if(bf.getRGB(x,y+1)==base_color){
+                    balde_l(bf,x,y+1,base_color,desired_color);
+                }
+            }
+            if( (y-1)>=0 ){
+                if(bf.getRGB(x,y-1)==base_color){
+                    balde_l(bf,x,y-1,base_color,desired_color);
+                }
+            }
+        }
+        
+        
     }
 
 }

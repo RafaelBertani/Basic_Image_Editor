@@ -19,22 +19,16 @@ public class Interface extends JFrame implements ActionListener{
     private JPanel BOTTOMpanel = new JPanel();
     private JMenuBar menubar = new JMenuBar();
     
-    //private JScrollPane CONTENT_js_Pane = new JScrollPane();
-    //JScrollPane scrollPane = new JScrollPane(panel);
     private JPanel CONTENTpanel = new JPanel();
     private JLabel CONTENT_image = new JLabel();
     private Image CONTENT_save;
     private int CONTENT_X_SIZE = WIDTH/4;
     private int CONTENT_Y_SIZE = HEIGHT/4;
-    private int content_x_start = WIDTH/2-CONTENT_X_SIZE/2;
-    private int content_x_end = content_x_start+CONTENT_X_SIZE;
-    private int content_y_start = (HEIGHT-(HEIGHT/8+HEIGHT/5))/2-CONTENT_Y_SIZE/2-HEIGHT/80; //(HEIGHT/80) to fix menubar
-    private int content_y_end = content_y_start+CONTENT_Y_SIZE;
-
+    
     public void cria_FRAME_PRINCIPAL(){
         
         //IMPLEMENTA MENUBAR
-        String[] princ = {"OP1","OP2","OP3"};
+        String[] princ = {"File","Options","OP3"};
         List<String[]> sec = new ArrayList<String[]>();
         sec.add(0,new String[]{"OP1.1","OP1.2"});
         sec.add(1,new String[]{"OP2.1","OP2.2"});
@@ -55,12 +49,19 @@ public class Interface extends JFrame implements ActionListener{
 
         //CONTENT PANEL
         Toolbox.implementa_label(CONTENT_image,"",false,WIDTH/2-CONTENT_X_SIZE/2,(HEIGHT-(HEIGHT/8+HEIGHT/5))/2-CONTENT_Y_SIZE/2,WIDTH/4,HEIGHT/4,CONTENTpanel);
-        //Toolbox.edita_label(CONTENT_image,null,Color.WHITE,null);
         CONTENT_save = (RandomImage.return_blank_image(HEIGHT/4,WIDTH/4));
         CONTENT_image.setIcon(new ImageIcon( CONTENT_save ));
+        CONTENT_image.addMouseMotionListener(mml);
         CONTENT_image.addMouseListener(ml_draw);
-        Toolbox.implementa_panel_no_panel(CONTENTpanel,MAINpanel,0,HEIGHT/8,WIDTH,HEIGHT-(HEIGHT/8+HEIGHT/5));
         Toolbox.edita_panel(CONTENTpanel,false,new Color(31,32,37)); //1,32,37
+        CONTENTpanel.add(CONTENT_image);
+        JScrollPane jp = new JScrollPane(CONTENTpanel);
+        jp.setBounds(0,HEIGHT/8,WIDTH,HEIGHT-(HEIGHT/8+HEIGHT/5));
+        jp.setBackground(new Color(31,32,37));
+        jp.setOpaque(true);
+        jp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        jp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        MAINpanel.add(jp);
 
         //BOTTOM PANEL
         BOTTOM_panel bp = new BOTTOM_panel();
@@ -90,43 +91,53 @@ public class Interface extends JFrame implements ActionListener{
         }
     }
     
-    Point location;
 
-    int X=0;
-    int Y=0;
-    public class thread_extends extends Thread {
-        public void run() {
-            while(!this.isInterrupted()){
-                location = MouseInfo.getPointerInfo().getLocation();
-                X = location.x;
-                Y = location.y-HEIGHT/5;
-                System.out.println(X+" "+content_x_start+" "+content_x_end);
-                System.out.println(Y+" "+content_y_start+" "+content_y_end);
-                if(X>=content_x_start && X<=content_x_end && Y>=content_y_start && Y<=content_y_end){
-                    CONTENT_save = RandomImage.paint_pixel(CONTENT_save,X-content_x_start,Y-content_y_start,TOOLS_panel.current_color.getBackground(),TOOLS_panel.pixels_Selector.getSelectedIndex(),TOOLS_panel.checkBox_circle.isSelected()?1:2,TOOLS_panel.checkBox_spray.isSelected());
+    MouseListener ml_draw = new MouseListener() {
+
+        @Override public void mouseClicked(MouseEvent e) {
+            if(x_pos>=0 && x_pos<=CONTENT_X_SIZE && y_pos>=0 && y_pos<=CONTENT_Y_SIZE){
+                if(TOOLS_panel.is_fill_selected){
+                    CONTENT_save = RandomImage.paint_pixel(CONTENT_save,x_pos,y_pos,TOOLS_panel.current_color.getBackground(),TOOLS_panel.pixels_Selector.getSelectedIndex(),3,false);
+                    CONTENT_image.setIcon(new ImageIcon(CONTENT_save));
+                }
+                else{
+                    CONTENT_save = RandomImage.paint_pixel(CONTENT_save,x_pos,y_pos,TOOLS_panel.current_color.getBackground(),TOOLS_panel.pixels_Selector.getSelectedIndex(),TOOLS_panel.checkBox_circle.isSelected()?1:2,TOOLS_panel.checkBox_spray.isSelected());
                     CONTENT_image.setIcon(new ImageIcon(CONTENT_save)); 
                 }
             }
         }
-    
-    }
-
-    thread_extends thread = new thread_extends();
-    
-    MouseListener ml_draw = new MouseListener() {
-
-        @Override public void mouseClicked(MouseEvent e) {}
         @Override public void mousePressed(MouseEvent e) {
-            thread = new thread_extends();
-            thread.start();
+            
         }
         @Override public void mouseReleased(MouseEvent e) {
-            thread.interrupt();
-            thread=null;
+            
         }
         @Override public void mouseEntered(MouseEvent e) {}
         @Override public void mouseExited(MouseEvent e) {}
 
+    };
+
+    public int x_pos = 0;
+    public int y_pos = 0;          
+
+    MouseMotionListener mml = new MouseMotionListener() {
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            x_pos = e.getX();
+            y_pos = e.getY();
+            if(x_pos>=0 && x_pos<=CONTENT_X_SIZE && y_pos>=0 && y_pos<=CONTENT_Y_SIZE){
+                CONTENT_save = RandomImage.paint_pixel(CONTENT_save,x_pos,y_pos,TOOLS_panel.current_color.getBackground(),TOOLS_panel.pixels_Selector.getSelectedIndex(),TOOLS_panel.checkBox_circle.isSelected()?1:2,TOOLS_panel.checkBox_spray.isSelected());
+                CONTENT_image.setIcon(new ImageIcon(CONTENT_save)); 
+            }
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            x_pos = e.getX();
+            y_pos = e.getY();
+        }
+        
     };
 
     
@@ -139,13 +150,10 @@ public class Interface extends JFrame implements ActionListener{
                 CONTENTpanel.remove(CONTENT_image);
 
                 CONTENT_X_SIZE=Integer.parseInt(BOTTOM_panel.width_textfield.getText());
-                content_x_start = WIDTH/2-CONTENT_X_SIZE/2;
-                content_x_end = content_x_start+CONTENT_X_SIZE;
-                content_y_start = (HEIGHT-(HEIGHT/8+HEIGHT/5))/2-CONTENT_Y_SIZE/2;
-                content_y_end = content_y_start+CONTENT_Y_SIZE;
 
                 CONTENT_save = (RandomImage.return_blank_image(CONTENT_Y_SIZE,CONTENT_X_SIZE));
                 CONTENT_image.setIcon(new ImageIcon( CONTENT_save ));
+                CONTENT_image.addMouseMotionListener(mml);
                 CONTENT_image.addMouseListener(ml_draw);
                 Toolbox.implementa_label(CONTENT_image,"",false,WIDTH/2-CONTENT_X_SIZE/2,(HEIGHT-(HEIGHT/8+HEIGHT/5))/2-CONTENT_Y_SIZE/2,CONTENT_X_SIZE,CONTENT_Y_SIZE,CONTENTpanel);
                 Toolbox.edita_panel(CONTENTpanel,false,new Color(31,32,37)); //1,32,37
@@ -156,13 +164,10 @@ public class Interface extends JFrame implements ActionListener{
                 CONTENTpanel.removeAll();
 
                 CONTENT_Y_SIZE=Integer.parseInt(BOTTOM_panel.height_textfield.getText());
-                content_x_start = WIDTH/2-CONTENT_X_SIZE/2;
-                content_x_end = content_x_start+CONTENT_X_SIZE;
-                content_y_start = (HEIGHT-(HEIGHT/8+HEIGHT/5))/2-CONTENT_Y_SIZE/2;
-                content_y_end = content_y_start+CONTENT_Y_SIZE;
 
                 CONTENT_save = (RandomImage.return_blank_image(CONTENT_Y_SIZE,CONTENT_X_SIZE));
                 CONTENT_image.setIcon(new ImageIcon( CONTENT_save ));
+                CONTENT_image.addMouseMotionListener(mml);
                 CONTENT_image.addMouseListener(ml_draw);
                 CONTENTpanel.setVisible(true);
                 Toolbox.implementa_label(CONTENT_image,"",false,WIDTH/2-CONTENT_X_SIZE/2,(HEIGHT-(HEIGHT/8+HEIGHT/5))/2-CONTENT_Y_SIZE/2,CONTENT_X_SIZE,CONTENT_Y_SIZE,CONTENTpanel);

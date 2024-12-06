@@ -48,11 +48,19 @@ public class TOOLS_panel extends JFrame implements ActionListener{
 
     //bar
     private JLabel bar3 = new JLabel();
+
+    //fill
+    private static JPanel FILLpanel = new JPanel();
+    private static JButton fill_button = new JButton();
+    public static boolean is_fill_selected = false;
     
+    private int HEIGHT;
+    private int WIDTH;
+
     public JPanel get_TOOLS_PANEL(Interface that){
         
-        int HEIGHT = that.HEIGHT;
-        int WIDTH = that.WIDTH;
+        this.HEIGHT = that.HEIGHT;
+        this.WIDTH = that.WIDTH;
 
         //initialize colors lines
         for(int i=0;i<6;i++){
@@ -133,7 +141,7 @@ public class TOOLS_panel extends JFrame implements ActionListener{
             pixels[i]=""+(i+1)+"px";
         }
         pixels_Selector=new JComboBox(pixels);
-        Toolbox.implementa_combobox(pixels_Selector,null,11,HEIGHT/35,WIDTH/15,HEIGHT/40,3,0,PIXELSpanel);
+        Toolbox.implementa_combobox(pixels_Selector,null,11,HEIGHT/35,WIDTH/15,HEIGHT/40,3,24,PIXELSpanel);
         Toolbox.edita_combobox(pixels_Selector,null,new Color(31,32,37),Color.WHITE);
 
         //add PIXELS panel do TOOLS panel
@@ -176,6 +184,17 @@ public class TOOLS_panel extends JFrame implements ActionListener{
         Toolbox.implementa_label(bar3,"",false,end_format+10,10,1,HEIGHT/8-20,TOOLSpanel);
 
 
+        //add fill button
+        try {
+            fill_button.setIcon(new ImageIcon(ResizeImage.resizeImage("./src/Images/fill_image_color.png",WIDTH/35,HEIGHT/8-20)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Toolbox.implementa_button(fill_button,"",0,0,WIDTH/35,HEIGHT/8-20,this,FILLpanel);
+
+        //add fill panel to TOOLS panel
+        Toolbox.implementa_panel_no_panel(FILLpanel,TOOLSpanel,end_format+21,10,WIDTH/35,HEIGHT/8-20);
+
         return TOOLSpanel;
     }
 
@@ -205,6 +224,24 @@ public class TOOLS_panel extends JFrame implements ActionListener{
             }
             else{
                 checkBox_circle.setSelected(false);
+            }
+        }
+        else if(e.getSource()==fill_button){
+            if(is_fill_selected){
+                is_fill_selected=false;
+                try {
+                    fill_button.setIcon(new ImageIcon(ResizeImage.resizeImage("./src/Images/fill_image_color.png",this.WIDTH/35,this.HEIGHT/8-20)));
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            else{
+                is_fill_selected=true;
+                try {
+                    fill_button.setIcon(new ImageIcon(ResizeImage.resizeImage("./src/Images/fill_image_color_selected.png",this.WIDTH/35,this.HEIGHT/8-20)));
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
